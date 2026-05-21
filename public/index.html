@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Moji Pick｜文字数カウント｜AIと協働できる文字数カウンター</title>
+    
+    <meta name="description" content="AIと協働するためのプロンプトを作成できるモダンな文字数カウンター。リアルタイムで文字数をカウントし、文章の一時保存もできます。登録不要で入力したデータは共有されません。" />
+    <meta name="theme-color" content="#f3f3f3" />
+    
+    <meta property="og:title" content="Moji Pick｜文字数カウント｜AIと協働できる文字数カウンター" />
+    <meta property="og:description" content="AIと協働するためのプロンプトを作成できるモダンな文字数カウンター。リアルタイムで文字数をカウントし、文章の一時保存もできます。登録不要で入力したデータは共有されません。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://moji.cadomal.com/" />
+    <meta property="og:image" content="https://moji.cadomal.com/eyecatch.jpeg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    
+    <link rel="icon" href="./icon.png" />
+    <link rel="apple-touch-icon" href="./icon.png" />
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <main class="screen">
+        <header class="header">
+          <div class="header-group header-group-left">
+            <button class="icon-button" type="button" aria-label="情報" data-open-popup="information">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            </button>
+            <button id="logoutButton" class="icon-button is-hidden" type="button" aria-label="ログアウト">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </button>
+            <div id="appTitle" class="title" data-message-type="title">Moji Pick</div>
+          </div>
+          <div class="header-group">
+            <button id="clearButton" class="dynamic-delete" type="button" aria-label="削除">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              <span class="btn-text">消去しますか？</span>
+            </button>
+          </div>
+        </header>
+
+        <section class="counter" aria-label="カウンター">
+          <div class="counter-left">
+            <div id="countAll" class="count-value">0</div>
+          </div>
+          <div class="ring-wrap">
+            <svg class="ring-svg" width="100" height="100" viewBox="0 0 100 100" aria-hidden="true">
+              <circle class="ring-track" r="44" cx="50" cy="50"></circle>
+              <circle id="ringProgress" class="ring-progress" r="44" cx="50" cy="50"></circle>
+            </svg>
+            <div class="ring-content">
+              <input id="targetInput" class="target-input" type="number" inputmode="numeric" value="100" aria-label="目標文字数" />
+              <div class="target-label">目標</div>
+            </div>
+          </div>
+        </section>
+
+        <div class="editor-group">
+          <textarea id="editor" class="editor" placeholder="ここにテキストを入力、またはペーストしてください。"></textarea>
+        </div>
+      </main>
+
+      <section class="control-panel" id="controlPanel" aria-label="操作パネル">
+        <div class="actions">
+          <button id="pasteButton" class="action-button gray-full" type="button" aria-label="ペースト">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+            <span class="btn-text">ペースト</span>
+          </button>
+
+          <button id="copyButton" class="action-button gray-full is-hidden" type="button" aria-label="文章をコピー">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            <span class="btn-text">コピー</span>
+          </button>
+
+          <button id="openPanelButton" class="action-button black-circle" type="button" aria-label="パネルを展開" data-open-popup="action-panel">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>
+          </button>
+        </div>
+
+        <div class="status" aria-live="polite">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/></svg>
+          <span id="statusText">文字をペーストしてカウントをはじめましょう</span>
+        </div>
+      </section>
+
+      <div id="popupLayer" class="popup-layer" hidden aria-hidden="true">
+        <div class="popup-backdrop" data-close-popup></div>
+        <section class="popup-sheet" id="popupSheet" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
+          <header class="popup-header" id="popupHeader">
+            <button id="backPopupButton" class="popup-close-button" type="button" aria-label="戻る" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button id="closePopupButton" class="popup-close-button" type="button" aria-label="閉じる" data-close-popup>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+            <div id="popupTitle" class="popup-title"></div>
+          </header>
+
+          <div class="popup-scroll">
+            <div id="popupContent" class="popup-content"></div>
+          </div>
+
+          <div id="popupActions" class="actions" hidden>
+            <button id="historyLoadButton" class="action-button gray-full" type="button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+              <span class="btn-text">読み込む</span>
+            </button>
+            <button id="historyCopyButton" class="action-button gray-circle" type="button" aria-label="コピー">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            </button>
+            <button id="historyDeleteButton" class="dynamic-delete" type="button" aria-label="削除">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              <span class="btn-text">消去しますか？</span>
+            </button>
+          </div>
+
+          <div class="popup-status" aria-live="polite">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/></svg>
+            <span id="popupStatusText"> </span>
+          </div>
+        </section>
+      </div>
+
+      <div id="authScreen" class="auth-screen">
+        <div class="auth-container">
+          <h1 class="auth-title">Moji Pick</h1>
+          <p class="auth-desc">AIと協働できる文字数カウンター</p>
+          
+          <div class="auth-tabs">
+            <button id="tabLogin" class="auth-tab active" type="button">ログイン</button>
+            <button id="tabRegister" class="auth-tab" type="button">新規登録</button>
+          </div>
+
+          <form id="authForm" class="auth-form">
+            <div class="input-group">
+              <label for="username">ユーザーID</label>
+              <input type="text" id="username" class="editor" required placeholder="3〜20文字の英数字">
+            </div>
+            <div class="input-group">
+              <label for="password">パスワード</label>
+              <input type="password" id="password" class="editor" required placeholder="8文字以上">
+            </div>
+            <button type="submit" id="authSubmitBtn" class="action-button black-text flex-grow" style="width: 100%; margin-top: 16px;">
+              ログイン
+            </button>
+            <div id="authError" class="auth-error" aria-live="polite"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="./apps.js"></script>
+  </body>
+</html>

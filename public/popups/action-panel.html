@@ -1,0 +1,37 @@
+<div class="popup-page" data-page="action-panel">
+  <div class="panel-header actions">
+    <button id="popupSaveButton" class="action-button black-text flex-grow" type="button">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17V3"/><path d="m6 11 6 6 6-6"/><path d="M19 21H5"/></svg>
+      <span class="btn-text">保存</span>
+    </button>
+    
+    <button id="popupAiButton" class="action-button black-text flex-grow" type="button" data-open-popup="ai-prompt">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.72a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.28 17.61a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="m6.163 21.117-2.906.85a1 1 0 0 1-1.236-1.169l.965-2.98"/></svg>
+      <span class="btn-text">AIと編集</span>
+    </button>
+
+    <button class="action-button black-circle" type="button" aria-label="閉じる" data-close-popup>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+  </div>
+
+  <div class="details-row">
+    <div class="detail-box">
+      <span class="detail-label">空白なし</span>
+      <span id="popupCountNoSpace" class="detail-value">0</span>
+    </div>
+    <div class="detail-box">
+      <span class="detail-label">行数</span>
+      <span id="popupCountLines" class="detail-value">0</span>
+    </div>
+    <div class="detail-box flex-grow">
+      <span class="detail-label">400字原稿用紙</span>
+      <span id="popupCountSheets" class="detail-value">0</span>
+    </div>
+  </div>
+
+  <div class="history-section">
+    <div class="history-title">保存した文章</div>
+    <div id="popupHistoryList" class="history-list"></div>
+  </div>
+</div>

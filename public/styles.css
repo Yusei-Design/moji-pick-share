@@ -1,0 +1,741 @@
+:root {
+  --bg: #f3f3f3;
+  --surface: #ffffff;
+  --text: #2c2c2c;
+  --muted: #5d5d5d;
+  --danger: #dd5a0f;
+  --ring-track: #e3e3e3;
+  --ring-progress: #2c2c2c;
+  --ring-success: #40af39;
+  --panel-shadow: rgba(44, 44, 44, 0.2);
+  --font-base: "Inter", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body,
+button,
+input,
+textarea {
+  font-family: var(--font-base);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text);
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  background: none;
+}
+
+.app {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+  position: relative;
+}
+
+.screen {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow: hidden;
+}
+
+.header {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-group-left {
+  min-width: 0;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.icon-button,
+.popup-close-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+}
+
+.icon-button {
+  background: var(--surface);
+}
+
+.popup-close-button {
+  background: var(--bg);
+  flex: 0 0 48px;
+}
+
+.icon-button svg,
+.popup-close-button svg,
+.action-button svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+}
+
+/* 動的削除ボタン（ヘッダー＆ポップアップ共通） */
+.dynamic-delete {
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
+  background: var(--surface);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ポップアップ内では背景をグレーにする */
+.popup-sheet .dynamic-delete {
+  background: var(--bg);
+}
+
+.dynamic-delete svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+}
+
+.dynamic-delete .btn-text {
+  max-width: 0;
+  opacity: 0;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 400;
+  color: #ffffff;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.dynamic-delete.is-confirming {
+  width: 164px;
+  background: var(--danger);
+  color: #ffffff;
+}
+
+.dynamic-delete.is-confirming .btn-text {
+  max-width: 100px;
+  opacity: 1;
+  margin-left: 8px;
+}
+
+.counter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.counter-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.count-value {
+  font-size: 48px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.ring-wrap {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  flex: 0 0 100px;
+}
+
+.ring-svg {
+  width: 100px;
+  height: 100px;
+  transform: rotate(-90deg);
+}
+
+.ring-track {
+  fill: none;
+  stroke: var(--ring-track);
+  stroke-width: 6;
+}
+
+.ring-progress {
+  fill: none;
+  stroke: var(--ring-progress);
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.3s, stroke 0.2s;
+}
+
+.ring-progress.completed {
+  stroke: var(--ring-success);
+}
+
+.ring-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.target-input {
+  width: 70px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: center;
+  outline: none;
+  appearance: textfield;
+  -moz-appearance: textfield;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.target-input::-webkit-outer-spin-button,
+.target-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.target-label {
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.editor-group {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.editor {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  border: 0;
+  border-radius: 16px;
+  background: var(--surface);
+  padding: 16px;
+  resize: none;
+  outline: none;
+  overflow: auto;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.editor::placeholder {
+  color: var(--text);
+  opacity: 1;
+}
+
+/* -------------------------------------
+   操作パネル / ボタン共通
+------------------------------------- */
+.control-panel {
+  flex: 0 0 auto;
+  background: var(--surface);
+  border-radius: 32px 32px 0 0;
+  box-shadow: 0 0 24px var(--panel-shadow);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.action-button {
+  height: 48px;
+  border-radius: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  overflow: hidden;
+}
+
+.action-button.flex-grow {
+  flex: 1 1 auto;
+}
+
+.btn-text {
+  transition: max-width 0.3s, opacity 0.2s;
+  max-width: 100px;
+  overflow: hidden;
+}
+
+.action-button.is-hidden {
+  flex: 0 0 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  opacity: 0 !important;
+  margin-left: -12px !important;
+  pointer-events: none !important;
+}
+
+/* ボタン種別定義 */
+.gray-full {
+  background: var(--bg);
+  color: var(--text);
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0 16px;
+}
+
+.gray-circle {
+  background: var(--bg);
+  color: var(--text);
+  flex: 0 0 48px;
+  width: 48px;
+  padding: 0;
+}
+
+.black-circle {
+  background: var(--muted);
+  color: #ffffff;
+  flex: 0 0 48px;
+  width: 48px;
+  padding: 0;
+}
+
+.black-text {
+  background: var(--muted);
+  color: #ffffff;
+  padding: 0 16px;
+}
+
+/* カウント詳細ボックス */
+.details-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.detail-box {
+  height: 48px;
+  border-radius: 16px;
+  border: 1px solid var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  gap: 9px;
+  white-space: nowrap;
+}
+
+.detail-box.flex-grow {
+  flex: 1 1 auto;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.detail-value {
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-base);
+}
+
+/* 一時保存リスト */
+.history-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.history-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.history-item {
+  width: 100%;
+  height: 48px;
+  border-radius: 24px;
+  background: var(--bg);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.history-item-text {
+  flex: 1 1 auto;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.history-item-date {
+  flex: 0 0 auto;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* ステータス（最下部） */
+.status,
+.popup-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 16px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--muted);
+  text-align: center;
+}
+
+.status {
+  margin-top: 16px;
+}
+
+.status svg,
+.popup-status svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+}
+
+/* -------------------------------------
+   ポップアップ関連
+------------------------------------- */
+.popup-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+}
+
+.popup-backdrop {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+}
+
+.popup-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--surface);
+  border-radius: 32px 32px 0 0;
+  box-shadow: 0 0 24px var(--panel-shadow);
+  padding: 24px 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-height: 80dvh;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.popup-layer.is-open .popup-sheet {
+  transform: translateY(0);
+}
+
+.popup-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.popup-title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.popup-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.popup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.popup-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.popup-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.popup-block-title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.popup-block-text {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+@keyframes fadeUpText {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-text {
+  animation: fadeUpText 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.prompt-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.prompt-section-title {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.prompt-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.prompt-card {
+  width: 100%;
+  padding: 14px 24px;
+  border-radius: 24px;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  color: var(--text);
+  cursor: pointer;
+}
+
+a.prompt-card {
+  text-decoration: none;
+}
+
+@keyframes popCheck {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-check {
+  animation: popCheck 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* -------------------------------------
+   認証画面 (Auth Screen)
+------------------------------------- */
+.auth-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  transition: opacity 0.3s;
+}
+
+.auth-screen.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 360px;
+  background: var(--surface);
+  border-radius: 32px;
+  padding: 32px 24px;
+  box-shadow: 0 0 24px var(--panel-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.auth-title {
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+}
+
+.auth-desc {
+  font-size: 14px;
+  color: var(--muted);
+  text-align: center;
+  margin: -16px 0 0 0;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 8px;
+  background: var(--bg);
+  padding: 4px;
+  border-radius: 20px;
+}
+
+.auth-tab {
+  flex: 1;
+  height: 36px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  transition: all 0.2s;
+}
+
+.auth-tab.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  padding-left: 4px;
+}
+
+.input-group .editor {
+  height: 48px;
+  min-height: 48px;
+  padding: 0 16px;
+  overflow: hidden;
+}
+
+.auth-error {
+  color: var(--danger);
+  font-size: 12px;
+  text-align: center;
+  min-height: 14px;
+}
