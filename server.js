@@ -9,7 +9,7 @@ const db = require('./db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.set('trust proxy', 1); // Render等のプロキシ環境でHTTPSセッションを有効にするために必要
+app.set('trust proxy', 1);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -40,7 +40,7 @@ const requireAuth = (req, res, next) => {
   }
 };
 
-app.post('/api/register', (req, res) => { // authLimiter を一時的に解除
+app.post('/api/register', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password || username.length < 3 || username.length > 20 || !/^[a-zA-Z0-9_]+$/.test(username) || password.length < 8) {
     return res.status(400).json({ error: 'ユーザー名は3〜20文字の半角英数字とアンダースコア、パスワードは8文字以上である必要があります。' });
@@ -48,32 +48,40 @@ app.post('/api/register', (req, res) => { // authLimiter を一時的に解除
 
   try {
     const hash = bcrypt.hashSync(password, 10);
-    const stmt = db.prepare('INSERT INTO users (username, password) VALUES (?, ?)');
-    stmt.run(username, hash);
+    const { error } = await db.from('users').insert([{ username, password: hash }]);
+    
+    if (error) {
+      if (error.code === '23505') {
+        return res.status(400).json({ error: 'そのユーザー名はすでに使われています。' });
+      }
+      throw error;
+    }
+    
     res.json({ success: true });
   } catch (err) {
-    if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-      res.status(400).json({ error: 'そのユーザー名はすでに使われています。' });
-    } else {
-      res.status(500).json({ error: 'サーバーエラーが発生しました。' });
-    }
+    console.error(err);
+    res.status(500).json({ error: 'サーバーエラーが発生しました。' });
   }
 });
 
-app.post('/api/login', (req, res) => { // authLimiter を一時的に解除
+app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
     return res.status(400).json({ error: 'ユーザー名とパスワードを入力してください。' });
   }
 
-  const stmt = db.prepare('SELECT * FROM users WHERE username = ?');
-  const user = stmt.get(username);
+  try {
+    const { data: user, error } = await db.from('users').select('*').eq('username', username).single();
 
-  if (user && bcrypt.compareSync(password, user.password)) {
-    req.session.userId = user.id;
-    req.session.username = user.username;
-    res.json({ success: true, username: user.username });
-  } else {
+    if (!error && user && bcrypt.compareSync(password, user.password)) {
+      req.session.userId = user.id;
+      req.session.username = user.username;
+      res.json({ success: true, username: user.username });
+    } else {
+      res.status(401).json({ error: 'ユーザー名またはパスワードが間違っています。' });
+    }
+  } catch (err) {
+    console.error(err);
     res.status(401).json({ error: 'ユーザー名またはパスワードが間違っています。' });
   }
 });
@@ -94,49 +102,80 @@ app.get('/api/session', (req, res) => {
   }
 });
 
-app.get('/api/texts', requireAuth, (req, res) => {
-  const stmt = db.prepare('SELECT * FROM texts WHERE user_id = ? ORDER BY created_at DESC LIMIT 20');
-  const texts = stmt.all(req.session.userId);
-  res.json(texts);
+app.get('/api/texts', requireAuth, async (req, res) => {
+  try {
+    const { data: texts, error } = await db
+      .from('texts')
+      .select('*')
+      .eq('user_id', req.session.userId)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    if (error) throw error;
+    res.json(texts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'データの取得に失敗しました。' });
+  }
 });
 
-app.post('/api/texts', requireAuth, (req, res) => {
+app.post('/api/texts', requireAuth, async (req, res) => {
   const { content } = req.body;
   if (!content || content.length > 10000) {
     return res.status(400).json({ error: '無効なテキストです。' });
   }
 
-  const countStmt = db.prepare('SELECT COUNT(*) as count FROM texts WHERE user_id = ?');
-  const { count } = countStmt.get(req.session.userId);
+  try {
+    const { count, error: countError } = await db
+      .from('texts')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', req.session.userId);
 
-  if (count >= 20) {
-    return res.status(400).json({ error: '保存上限（20件）に達しています。不要なデータを削除してから保存してください。' });
+    if (countError) throw countError;
+    if (count >= 20) {
+      return res.status(400).json({ error: '保存上限（20件）に達しています。不要なデータを削除してから保存してください。' });
+    }
+
+    const { data: latest, error: latestError } = await db
+      .from('texts')
+      .select('content')
+      .eq('user_id', req.session.userId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (!latestError && latest && latest.content === content) {
+      return res.status(400).json({ error: 'すでに最新の状態で保存されています。' });
+    }
+
+    const { data: newText, error: insertError } = await db
+      .from('texts')
+      .insert([{ user_id: req.session.userId, content }])
+      .select()
+      .single();
+
+    if (insertError) throw insertError;
+    res.json(newText);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: '保存に失敗しました。' });
   }
-
-  const checkDupStmt = db.prepare('SELECT content FROM texts WHERE user_id = ? ORDER BY created_at DESC LIMIT 1');
-  const latest = checkDupStmt.get(req.session.userId);
-  if (latest && latest.content === content) {
-    return res.status(400).json({ error: 'すでに最新の状態で保存されています。' });
-  }
-
-  const insertStmt = db.prepare('INSERT INTO texts (user_id, content) VALUES (?, ?)');
-  const result = insertStmt.run(req.session.userId, content);
-  
-  const newTextStmt = db.prepare('SELECT * FROM texts WHERE id = ?');
-  const newText = newTextStmt.get(result.lastInsertRowid);
-  
-  res.json(newText);
 });
 
-app.delete('/api/texts/:id', requireAuth, (req, res) => {
+app.delete('/api/texts/:id', requireAuth, async (req, res) => {
   const textId = req.params.id;
-  const stmt = db.prepare('DELETE FROM texts WHERE id = ? AND user_id = ?');
-  const info = stmt.run(textId, req.session.userId);
-  
-  if (info.changes > 0) {
+  try {
+    const { error } = await db
+      .from('texts')
+      .delete()
+      .eq('id', textId)
+      .eq('user_id', req.session.userId);
+
+    if (error) throw error;
     res.json({ success: true });
-  } else {
-    res.status(404).json({ error: 'テキストが見つからないか、権限がありません。' });
+  } catch (err) {
+    console.error(err);
+    res.status(404).json({ error: '削除に失敗したか、権限がありません。' });
   }
 });
 
