@@ -9,6 +9,8 @@ const db = require('./db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.set('trust proxy', 1); // Render等のプロキシ環境でHTTPSセッションを有効にするために必要
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
