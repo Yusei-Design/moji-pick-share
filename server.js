@@ -38,7 +38,7 @@ const requireAuth = (req, res, next) => {
   }
 };
 
-app.post('/api/register', authLimiter, (req, res) => {
+app.post('/api/register', (req, res) => { // authLimiter を一時的に解除
   const { username, password } = req.body;
   if (!username || !password || username.length < 3 || username.length > 20 || !/^[a-zA-Z0-9_]+$/.test(username) || password.length < 8) {
     return res.status(400).json({ error: 'ユーザー名は3〜20文字の半角英数字とアンダースコア、パスワードは8文字以上である必要があります。' });
@@ -58,7 +58,7 @@ app.post('/api/register', authLimiter, (req, res) => {
   }
 });
 
-app.post('/api/login', authLimiter, (req, res) => {
+app.post('/api/login', (req, res) => { // authLimiter を一時的に解除
   const { username, password } = req.body;
   if (!username || !password) {
     return res.status(400).json({ error: 'ユーザー名とパスワードを入力してください。' });
