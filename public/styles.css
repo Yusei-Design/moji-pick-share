@@ -731,6 +731,8 @@ a.prompt-card {
   min-height: 48px;
   padding: 0 16px;
   overflow: hidden;
+  background: var(--bg);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .auth-error {
